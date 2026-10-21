@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YUNHO's Phone</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Apple SD Gothic Neo', sans-serif; }
+        body { background-color: #111; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+        
+        /* 스마트폰 외형 프레임 */
+        .phone-frame {
+            width: 390px; height: 844px; background: #000; border-radius: 40px;
+            box-shadow: 0 0 30px rgba(255,255,255,0.1); position: relative; overflow: hidden;
+            border: 10px solid #333;
+        }
+
+        /* 화면 공통 */
+        .screen { width: 100%; height: 100%; position: absolute; top: 0; left: 0; display: none; flex-direction: column; transition: 0.3s; }
+        .screen.active { display: flex; }
+
+        /* 1. 잠금화면 */
+        #lock-screen {
+            background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=600&auto=format&fit=crop') center/cover;
+            color: white; justify-content: space-between; padding: 60px 20px 40px 20px; align-items: center; cursor: pointer;
+        }
+        .lock-time { font-size: 64px; font-weight: 200; text-align: center; }
+        .lock-date { font-size: 18px; font-weight: 300; text-align: center; margin-top: -40px; }
+        .unlock-text { font-size: 14px; opacity: 0.8; animation: bounce 1.5s infinite; text-align: center; }
+
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+        /* 2. 홈 화면 */
+        #home-screen {
+            background: url('https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=600&auto=format&fit=crop') center/cover;
+            padding: 50px 20px 20px 20px; justify-content: space-between;
+        }
+        .status-bar { display: flex; justify-content: space-between; color: white; font-size: 14px; font-weight: 600; }
+        .app-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; padding: 20px 10px; }
+        .app-icon { display: flex; flex-direction: column; align-items: center; cursor: pointer; text-align: center; }
+        .app-icon div { width: 60px; height: 60px; background: rgba(255,255,255,0.8); border-radius: 15px; display: flex; justify-content: center; align-items: center; font-size: 26px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: 0.2s; }
+        .app-icon div:active { transform: scale(0.9); }
+        .app-icon span { color: white; font-size: 12px; margin-top: 6px; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
+
+        /* 하단 독바 */
+        .dock { background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); border-radius: 25px; padding: 15px; display: flex; justify-content: space-around; margin-bottom: 10px; }
+
+        /* 3. 앱 내부 공통 (상단바 포함) */
+        .app-header { background: #f8f9fa; padding: 45px 20px 15px 20px; display: flex; align-items: center; font-weight: bold; font-size: 16px; border-bottom: 1px solid #ddd; }
+        .back-btn { background: none; border: none; font-size: 16px; color: #007aff; cursor: pointer; margin-right: 15px; }
+        
+        /* 메시지 앱 스타일 */
+        #chat-screen { background: #efeae2; }
+        .chat-body { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .bubble { max-width: 70%; padding: 10px 14px; border-radius: 15px; font-size: 14px; line-height: 1.4; }
+        .bubble.yunho { background: white; align-self: flex-start; border-top-left-radius: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .bubble.me { background: #fee500; align-self: flex-end; border-top-right-radius: 2px; }
+
+        /* 갤러리 앱 스타일 */
+        #gallery-screen { background: #fff; }
+        .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; overflow-y: auto; flex: 1; }
+        .gallery-item { aspect-ratio: 1; background: #ddd; background-size: cover; background-position: center; }
+
+        /* 메모장 앱 스타일 */
+        #memo-screen { background: #fffbe9; }
+        .memo-content { padding: 20px; font-size: 15px; line-height: 1.6; color: #333; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+
+    <div class="phone-frame">
+        
+        <!-- 1. 잠금화면 -->
+        <div id="lock-screen" class="screen active" onclick="unlockPhone()">
+            <div></div>
+            <div>
+                <div class="lock-time" id="clock">10:23</div>
+                <div class="lock-date">10월 22일 수요일</div>
+            </div>
+            <div class="unlock-text">🔒 화면을 눌러서 잠금해제</div>
+        </div>
+
+        <!-- 2. 홈 화면 -->
+        <div id="home-screen" class="screen">
+            <div class="status-bar">
+                <span id="status-time">10:23</span>
+                <span>🔋 99%</span>
+            </div>
+            <div class="app-grid">
+                <div class="app-icon" onclick="openApp('chat-screen')">
+                    <div>💬</div><span>메시지</span>
+                </div>
+                <div class="app-icon" onclick="openApp('gallery-screen')">
+                    <div>🖼️</div><span>갤러리</span>
+                </div>
+                <div class="app-icon" onclick="openApp('memo-screen')">
+                    <div>📝</div><span>비밀메모</span>
+                </div>
+            </div>
+            <div class="dock">
+                <div class="app-icon" onclick="openApp('chat-screen')"><div>📞</div></div>
+                <div class="app-icon" onclick="openApp('gallery-screen')"><div>🧭</div></div>
+                <div class="app-icon" onclick="openApp('memo-screen')"><div>🎵</div></div>
+            </div>
+        </div>
+
+        <!-- 3. 메시지(버블) 앱 -->
+        <div id="chat-screen" class="screen">
+            <div class="app-header">
+                <button class="back-btn" onclick="goHome()">〈 홈</button>
+                정윤호 댕댕이 🐶
+            </div>
+            <div class="chat-body">
+                <div class="bubble yunho">뭐해? 스케줄 끝나고 연습실인데 네 생각 나서 폰 봤어 ㅎㅎ</div>
+                <div class="bubble yunho">오늘도 내 생각 해써 안 해써? 🥺</div>
+                <div class="bubble me">당연히 하지 !! 윤호는 오늘 어땠어?</div>
+                <div class="bubble yunho">난 네가 없으니까 당연히 보고 싶었지... ❤️ 이따 밤에 잠시 볼 수 있어? 몰래 나갈게</div>
+            </div>
+        </div>
+
+        <!-- 4. 갤러리 앱 -->
+        <div id="gallery-screen" class="screen">
+            <div class="app-header">
+                <button class="back-btn" onclick="goHome()">〈 홈</button>
+                비밀 앨범 (🔒 Only You)
+            </div>
+            <div class="gallery-grid">
+                <div class="gallery-item" style="background-image: url('https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=400&auto=format&fit=crop');"></div>
+                <div class="gallery-item" style="background-image: url('https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?q=80&w=400&auto=format&fit=crop');"></div>
+                <div class="gallery-item" style="background-image: url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400&auto=format&fit=crop');"></div>
+                <div class="gallery-item" style="background-image: url('https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=400&auto=format&fit=crop');"></div>
+            </div>
+        </div>
+
+        <!-- 5. 메모장 앱 -->
+        <div id="memo-screen" class="screen">
+            <div class="app-header">
+                <button class="back-btn" onclick="goHome()">〈 홈</button>
+                비밀 To-Do 및 속마음
+            </div>
+            <div class="memo-content">
+[ 💌 윤호의 비밀 메모 ]
+
+1. 우리 만나는 날 야식 메뉴 미리 알아두기 (떡볶이 매운맛 절대 금지)
+2. 콘서트 무대할 때 객석 쪽으로 눈짓 한번 더 보내기 👀✨
+3. "오늘도 많이 사랑해. 누가 뭐라 해도 내 편 해줘야 된다? 약속!"
+
+- 딴 사람한텐 절대 보여주기 금지 -
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // 시간 실시간 표시
+        function updateTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const timeString = `${hours}:${minutes}`;
+            document.getElementById('clock').innerText = timeString;
+            document.getElementById('status-time').innerText = timeString;
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // 화면 전환 함수
+        function unlockPhone() {
+            document.getElementById('lock-screen').classList.remove('active');
+            document.getElementById('home-screen').classList.add('active');
+        }
+
+        function openApp(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function goHome() {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('home-screen').classList.add('active');
+        }
+    </script>
+</body>
+</html>
